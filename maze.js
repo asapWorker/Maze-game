@@ -1,20 +1,21 @@
 function createMaze() {
-  let gameContainer = document.getElementById("game_container");
   let maze = document.getElementById("maze");
 
-  let [cellSide, rows, cols] = calculateMazeSizes(gameContainer);
+  let [cellSide, rows, cols] = calculateMazeSizes();
 
   modifyMazeArea(maze, cellSide, rows, cols);
 
   generateMazePaths(maze, cellSide, rows, cols);
 }
 
-function calculateMazeSizes(gameContainer) {
-  let mazeHeight = gameContainer.clientHeight;
-  let mazeWidth = gameContainer.clientWidth;
+function calculateMazeSizes() {
+  let mazeHeight = document.documentElement.offsetHeight;
+  let mazeWidth = document.documentElement.offsetWidth;
 
   if (mazeHeight > mazeWidth) {
-    [mazeHeight, mazeWidth] = [mazeWidth, mazeHeight];
+    let x = mazeHeight;
+    mazeHeight = mazeWidth;
+    mazeWidth = x;
   }
   mazeHeight *= 0.9;
   mazeWidth = Math.min(mazeHeight * 1.5, mazeWidth);
