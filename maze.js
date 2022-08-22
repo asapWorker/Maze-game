@@ -1,50 +1,54 @@
+const BGColor = 'rgb(0, 40, 70)';
+const PATHColor = 'rgb(0, 120, 150)';
+const POINTColor = 'rgb(255, 0, 0)';
+
+let mazeArea = document.getElementById("maze");
+const [cellHeight, cellWidth, rows, cols] = calculateMazeSizes(mazeArea);
+
+drawPath = drawPath.bind(null, mazeArea, cellHeight, cellWidth);
+drawPointer = drawPointerWrapper(mazeArea, cellHeight, cellWidth, drawPointer);
+
+
+/* Create maze
+---------------------------------*/
 function createMaze() {
-  let maze = document.getElementById("maze");
-
-  let [cellSide, rows, cols] = calculateMazeSizes();
-
-  modifyMazeArea(maze, cellSide, rows, cols);
-
-  generateMazePaths(maze, cellSide, rows, cols);
-}
-
-function calculateMazeSizes() {
-  let mazeHeight = document.documentElement.offsetHeight;
-  let mazeWidth = document.documentElement.offsetWidth;
-
-  if (mazeHeight > mazeWidth) {
-    let x = mazeHeight;
-    mazeHeight = mazeWidth;
-    mazeWidth = x;
+  if (mazeArea.getContext) {
+    const ctx = mazeArea.getContext('2d');
+    ctx.fillStyle = BGColor;
+    ctx.fillRect(0, 0, cellWidth * cols, cellHeight * rows);
   }
-  mazeHeight *= 0.9;
-  mazeWidth = Math.min(mazeHeight * 1.5, mazeWidth);
 
-  let cellSide = Math.max(Math.floor(mazeHeight * 0.04), 10);
-  let rows = Math.floor(mazeHeight / cellSide);
-  let cols = Math.floor(mazeWidth / cellSide);
-  cols -= (cols - 1) % 2;
-  rows -= (rows - 1) % 2;
+  const pathsObj = generateMazePaths(mazeArea, cellHeight, cellWidth, rows, cols);
 
-  return [cellSide, rows, cols];
+  return {
+    paths: pathsObj,
+    move: drawPointer,
+  }
 }
 
-function modifyMazeArea(mazeArea, cellSide, rows, cols) {
-  let w = cols * cellSide;
-  let h = rows * cellSide;
 
-  mazeArea.width = w;
-  mazeArea.height = h;
+/* Calculate maze sizes
+---------------------------------*/
+function calculateMazeSizes(mazeArea) {
+  let mazeHeight = mazeArea.height;
+  let mazeWidth = mazeArea.width;
 
-  let ctx = mazeArea.getContext('2d');
-  ctx.fillStyle = 'rgb(100, 100, 100)';
-  ctx.fillRect(0, 0, w, h);
+  let rows = Math.floor(mazeHeight / 7);
+  let cols = Math.floor(mazeWidth / (mazeHeight / rows * 1.7));
+  rows -= (rows + 1) % 2;
+  cols -= (cols + 1) % 2;
 
-  drawPath(mazeArea, cellSide, 0, 0, 2);
-  drawPath(mazeArea, cellSide, rows - 1, cols - 1, 0);
+  let cellHeight = Math.floor(mazeHeight / rows);
+  let cellWidth = Math.floor(mazeWidth / cols);
+
+  return [cellHeight, cellWidth, rows, cols];
 }
 
-function generateMazePaths(mazeArea, cellSide, rows, cols) {
+
+/* Generate maze paths
+---------------------------------*/
+function generateMazePaths(mazeArea, cellHeight, cellWidth, rows, cols) {
+  //DIRS = [right, bottom, left, top]
   const DIRS = [[0, 2], [2, 0], [0, -2], [-2, 0]];
   const DIRS_COUNT = 4;
 
@@ -57,10 +61,31 @@ function generateMazePaths(mazeArea, cellSide, rows, cols) {
     if (seenCells.has(cellId)) return null;
 
     seenCells.add(cellId);
-    drawPath(mazeArea, cellSide, row, col, dir);
-    if (row === rows - 1 && col === cols - 1) return null;
+    drawPath(row, col, dir);
+    if (row === rows - 2 && col === cols - 2) {
+
+      let exitCellRow = row;
+      let exitCellCol = col;
+      if (!dir) exitCellCol++;
+      else exitCellRow++;
+      const curObj = {
+        [0]: null,
+        [1]: null,
+        [2]: null,
+        [3]: null,
+        isExit: true,
+      }
+      curObj.row = exitCellRow;
+      curObj.col = exitCellCol
+      drawPath(exitCellRow, exitCellCol, dir);
+      return curObj;
+    }
 
     let usedDirections = new Set();
+
+    //object statistics
+    const curObj = {};
+    let noTurns = true;
 
     while (usedDirections.size < DIRS_COUNT) {
       let chosenDirNumber = intRandom(DIRS_COUNT - usedDirections.size);
@@ -70,24 +95,40 @@ function generateMazePaths(mazeArea, cellSide, rows, cols) {
         else {
           if (!chosenDirNumber) {
             usedDirections.add(i);
-            generatePaths(row + DIRS[i][0], col + DIRS[i][1], i);
+
+            //move to adjacent cell
+            const adjacentObj = generatePaths(row + DIRS[i][0], col + DIRS[i][1], i);
+            if (noTurns && (i !== dir) && adjacentObj) noTurns = false;
+            curObj[i] = adjacentObj;
+            
             break;
           } else chosenDirNumber--;
         }
       }
     }
+    // is part of direct path
+    if (noTurns && curObj[dir]) {
+      return curObj[dir];
+    } else {
+      curObj.row = row;
+      curObj.col = col;
+      return curObj;
+    }
   }
-  generatePaths(1, 1, -1);
+  return(generatePaths(1, 1, -1));
 }
 
-function drawPath(mazeArea, cellSide, row, col, translationInd) {
+
+/* Draw path
+---------------------------------*/
+function drawPath(mazeArea, cellHeight, cellWidth, row, col, translationInd) {
   let RECT_SIDES = [[1, 2], [2, 1]];
 
   if (translationInd === -1) {
     if (mazeArea.getContext) {
       const ctx = mazeArea.getContext('2d');
-      ctx.fillStyle = 'rgb(0, 0, 0)';
-      ctx.fillRect(cellSide, cellSide, cellSide, cellSide);
+      ctx.fillStyle = PATHColor;
+      ctx.fillRect(cellWidth, cellHeight, cellWidth, cellHeight);
     }
     return;
   }
@@ -97,11 +138,37 @@ function drawPath(mazeArea, cellSide, row, col, translationInd) {
   } else if (translationInd === 1) {
     row--;
   }
+
   if (mazeArea.getContext) {
     const ctx = mazeArea.getContext('2d');
-    let rectType = RECT_SIDES[translationInd % 2];
-    ctx.fillStyle = 'rgb(0, 0, 0)';
-    ctx.fillRect(col * cellSide, row * cellSide, rectType[1] * cellSide, rectType[0] * cellSide);
+    const rectType = RECT_SIDES[translationInd % 2];
+    const w = rectType[1];
+    const h = rectType[0];
+    ctx.fillStyle = PATHColor;
+    ctx.fillRect(col * cellWidth, row * cellHeight, w * cellWidth, h * cellHeight);
+  }
+}
+
+/* Draw pointer
+---------------------------------*/
+function drawPointerWrapper(maze, cellHeight, cellWidth, drawPointer) {
+  let prevX = -1;
+  let prevY = -1;
+
+  return function(row, col) {
+    drawPointer(maze, cellHeight, cellWidth, prevX, prevY, PATHColor);
+    drawPointer(maze, cellHeight, cellWidth, row, col, POINTColor);
+
+    prevX = row;
+    prevY = col;
+  }
+}
+
+function drawPointer(maze, cellHeight, cellWidth, row, col, color) {
+  if (maze.getContext) {
+    const ctx = maze.getContext('2d');
+    ctx.fillStyle = color;
+    ctx.fillRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight);
   }
 }
 

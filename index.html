@@ -6,12 +6,19 @@
   <title>Maze</title>
 </head>
 <body>
-  <div class="rotate_notification">
-    Поверните телефон для лучшего отображения
+  <div id="maze-container" class="maze-container">
+    <canvas id="maze" class="maze"></canvas>
   </div>
-  <canvas id="maze" class="maze"></canvas>
+
+  <div id="menu-wrapper" class="menu-wrapper">
+    <div class="menu">
+      <div id="menu-title" class="menu-title">Maze game</div>
+      <button id="menu-button" class="menu-button">Start</button>
+    </div>
+  </div>
 
   <script src="helpFunctions.js"></script>
+  <script src="menu.js"></script>
   <script src="maze.js"></script>
   <script src="main.js"></script>
 </body>
