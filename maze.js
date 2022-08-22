@@ -159,8 +159,13 @@ function drawPointerWrapper(maze, cellHeight, cellWidth, drawPointer) {
     drawPointer(maze, cellHeight, cellWidth, prevX, prevY, PATHColor);
     drawPointer(maze, cellHeight, cellWidth, row, col, POINTColor);
 
-    prevX = row;
-    prevY = col;
+    if ((row === rows - 1) || (col === cols - 1)) {
+      prevX = -1;
+      prevY = -1;
+    } else {
+      prevX = row;
+      prevY = col;
+    }
   }
 }
 
