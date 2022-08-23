@@ -8,7 +8,7 @@ function addStartBtnListener(action) {
 }
 
 function showGreetingMenu() {
-  MENU.style.visibility = 'visible';
+  MENU.classList.add('visible');
 }
 function showMenu() {
   if (!changed) {
@@ -16,9 +16,9 @@ function showMenu() {
     document.getElementById('menu-button').value = BTN_TEXT;
     changed = true;
   }
-  MENU.style.visibility = 'visible'
+  MENU.classList.add('visible');
 }
 
 function closeMenu() {
-  MENU.style.visibility = 'hidden';
+  MENU.classList.remove('visible');
 }

@@ -14,6 +14,27 @@ body {
   touch-action: none;
 }
 
+/*Default game visibility params
+--------------------------------*/
+.game-container .game-field {
+  visibility: visible;
+}
+
+.game-container .rotate-notification {
+  visibility: hidden;
+}
+
+.rotate-notification {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  font-size: 2em;
+  font-weight: bold;
+  color: #403a61;
+}
+
 
 /*Maze
 ------------------------*/
@@ -38,11 +59,16 @@ body {
   position: fixed;
   width: 100%;
   height: 100%;
-  z-index: 1000;
+  z-index: 1;
   background-color: rgba(0, 0, 0, 0.9);
 
   visibility: hidden;
 }
+
+.menu-wrapper.visible {
+  visibility: visible;
+}
+
 .menu {
   display: flex;
   flex-direction: column;
@@ -103,3 +129,22 @@ body {
     height: 30%;
   }
 }
+
+/*Change game visibility for mobile devices in landscape
+-----------------------------*/
+@media screen and (orientation: landscape) {
+  .game-container.mobile .game-field {
+    visibility: hidden;
+  }
+
+  .game-container.mobile .rotate-notification {
+    visibility: visible;
+  }
+
+  .game-container.mobile .menu-wrapper.visible {
+    visibility: hidden;
+  }
+}
+
+
+
