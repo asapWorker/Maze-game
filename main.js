@@ -4,8 +4,14 @@ const START_R = 1;
 const START_C = 1;
 
 
+/*Check device is mobile
+---------------------------*/
+if (navigator.userAgent.match(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i)) {
+  document.getElementById('game-container').classList.add('mobile');
+}
+
 /*Session start
-----------------------------*/
+---------------------------*/
 showGreetingMenu();
 addStartBtnListener(showMaze);
 
