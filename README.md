@@ -1,7 +1,7 @@
 # maze-game
 ### Simple game
 
-##### Created by using:
+#### Created by using:
 - native javaScript
 - html
 - css
