@@ -1,5 +1,5 @@
 # maze-game
-### Simple game
+Simple game
 
 #### Created by using:
 - native javaScript
